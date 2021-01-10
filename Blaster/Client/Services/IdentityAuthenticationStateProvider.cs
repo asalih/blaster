@@ -2,7 +2,6 @@
 using Blaster.Shared.User;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -40,6 +39,16 @@ namespace Blaster.Client.Services
 
             _userInfoCache = null;
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        }
+
+        public async Task ForgotPassword(ForgotPasswordModel forgotPasswordModel)
+        {
+            await _authorizeApi.ForgotPassword(forgotPasswordModel);
+        }
+
+        public async Task ResetPassword(ResetPasswordModel resetPasswordModel)
+        {
+            await _authorizeApi.ResetPassword(resetPasswordModel);
         }
 
         private async Task<UserInfo> GetUserInfo()

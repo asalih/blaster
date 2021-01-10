@@ -18,6 +18,7 @@ namespace Blaster.Client
 
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
+
             builder.Services.AddScoped<IdentityAuthenticationStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<IdentityAuthenticationStateProvider>());
             builder.Services.AddScoped<IAuthorizeApi, AuthorizeApi>();

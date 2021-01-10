@@ -28,12 +28,18 @@
 
     <label class="text-danger">@error</label>
 
-    <NavLink href="register">
-        <h6 class="font-weight-normal text-center">Create account</h6>
-    </NavLink>
+    <div class="m-3 text-center">
+        <NavLink href="register">
+            <a class="font-weight-normal text-center">Create account</a>
+        </NavLink>
+        |
+        <NavLink href="forgot-password">
+            <a class="font-weight-normal text-center">Forgot password</a>
+        </NavLink>
+    </div>
 </EditForm>
 
-@code{ 
+@code{
     LoginModel loginModel { get; set; } = new LoginModel();
     string error { get; set; }
 
@@ -49,5 +55,5 @@
         {
             error = ex.Message;
         }
-    } 
     }
+}

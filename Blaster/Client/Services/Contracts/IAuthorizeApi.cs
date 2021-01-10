@@ -11,6 +11,10 @@ namespace Blaster.Client.Services.Contracts
 
         Task Logout();
 
+        Task ForgotPassword(ForgotPasswordModel forgotPasswordModel);
+
+        Task ResetPassword(ResetPasswordModel resetPasswordModel);
+
         Task<UserInfo> GetUserInfo();
     }
 }

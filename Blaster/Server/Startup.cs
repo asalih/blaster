@@ -1,8 +1,9 @@
 using Blaster.Infrastructure;
-using Blaster.Server.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -30,14 +31,8 @@ namespace Blaster.Server
             
             services.AddBlasterIdentity();
 
-            services.AddMvcCore(options =>
-            {
-                options.Filters.Add(typeof(ValidateModelFilter));
-            });
-
             services.Configure<ApiBehaviorOptions>(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
+            {        
             });
 
             services.ConfigureApplicationCookie(options =>

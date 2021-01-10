@@ -49,5 +49,29 @@ namespace Blaster.Client.Services
             
             result.EnsureSuccessStatusCode();
         }
+
+        public async Task ForgotPassword(ForgotPasswordModel forgotPasswordModel)
+        {
+            var result = await _httpClient.PostAsJsonAsync("api/Authorize/ForgotPassword", forgotPasswordModel);
+
+            if (result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                throw new Exception(await result.Content.ReadAsStringAsync());
+            }
+
+            result.EnsureSuccessStatusCode();
+        }
+
+        public async Task ResetPassword(ResetPasswordModel resetPasswordModel)
+        {
+            var result = await _httpClient.PostAsJsonAsync("api/Authorize/ResetPassword", resetPasswordModel);
+
+            if (result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                throw new Exception(await result.Content.ReadAsStringAsync());
+            }
+
+            result.EnsureSuccessStatusCode();
+        }
     }
 }

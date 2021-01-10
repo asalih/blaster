@@ -1,4 +1,6 @@
 ﻿using Blaster.Infrastructure.Entity;
+using Blaster.Infrastructure.Utility;
+using Blaster.Infrastructure.Utility.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -33,9 +35,12 @@ namespace Blaster.Infrastructure
 
         public static IServiceCollection AddBlasterIdentity(this IServiceCollection services)
         {
-            services.AddIdentity<User, IdentityRole<Guid>>()
+            services.AddIdentity<User, IdentityRole<Guid>>(v => v.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<DataContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddTransient<IEmailHelper, EmailHelper>();
+            services.AddTransient<CustomUrlHelper>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -53,7 +58,7 @@ namespace Blaster.Infrastructure
                 options.Lockout.AllowedForNewUsers = true;
 
                 // User settings
-                options.User.RequireUniqueEmail = false;
+                options.User.RequireUniqueEmail = true;
             });
 
             return services;
