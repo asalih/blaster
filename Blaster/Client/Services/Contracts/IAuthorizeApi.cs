@@ -15,6 +15,8 @@ namespace Blaster.Client.Services.Contracts
 
         Task ResetPassword(ResetPasswordModel resetPasswordModel);
 
+        Task ConfirmEmail(ConfirmEmailModel confirmEmailModel);
+
         Task<UserInfo> GetUserInfo();
     }
 }

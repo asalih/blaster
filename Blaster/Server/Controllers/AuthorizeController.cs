@@ -81,11 +81,19 @@ namespace Blaster.Server.Controllers
                 return BadRequest(result.Errors.FirstOrDefault()?.Description);
             }
 
-            return await Login(new LoginModel
+            var createdUser = await _userManager.FindByEmailAsync(registerModel.Email);
+
+            if(createdUser == null)
             {
-                Email = registerModel.Email,
-                Password = registerModel.Password
-            });
+                return BadRequest("Something went wrong!");
+            }
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser);
+
+            var uri = _customUrlHelper.GenerateUrl("confirm-email", new { t = token });
+            _emailHelper.Render(to: user.Email, subject: "Confirm Email", template: EmailTemplate.ConfirmEmail, new { uri });
+
+            return Ok();
         }
 
         [HttpPost]
@@ -149,6 +157,50 @@ namespace Blaster.Server.Controllers
             }
 
             var result = await _userManager.ResetPasswordAsync(user, resetPasswordModel.ResetToken, resetPasswordModel.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(_error);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailModel confirmEmailModel)
+        {
+            const string _error = "Email confirmation has been failed!";
+
+            if (!Infrastructure.Extensions.TryFromBase64String(confirmEmailModel.ConfirmToken, out var confirmTokenArray))
+            {
+                return BadRequest(_error);
+            }
+
+            var unprotectedConfirmTokenArray = _dataProtector.Unprotect(confirmTokenArray);
+
+            var userIdInput = string.Empty;
+
+            using (var ms = new MemoryStream(unprotectedConfirmTokenArray))
+            using (var reader = new BinaryReader(ms))
+            {
+                reader.ReadInt64();
+                userIdInput = reader.ReadString();
+            }
+
+            if (!Guid.TryParse(userIdInput, out var _))
+            {
+                return BadRequest(_error);
+            }
+
+            var user = await _userManager.FindByIdAsync(userIdInput);
+
+            if (user == null)
+            {
+                return BadRequest(_error);
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, confirmEmailModel.ConfirmToken);
 
             if (!result.Succeeded)
             {

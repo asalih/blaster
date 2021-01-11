@@ -5,10 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Templates\ConfirmEmail.html" />
     <None Remove="Templates\ResetPassword.html" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Templates\ConfirmEmail.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Templates\ResetPassword.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>

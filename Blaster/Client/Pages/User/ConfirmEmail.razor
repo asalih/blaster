@@ -1,0 +1,53 @@
+﻿@page "/confirm-email"
+@layout LoginLayout
+@inject NavigationManager navigationManager
+@inject IdentityAuthenticationStateProvider authStateProvider
+@using Microsoft.AspNetCore.WebUtilities
+
+<h1 class="h2 font-weight-normal login-title">
+    Blaster
+</h1>
+
+<div class="form-signin">
+    <h4 class="font-weight-normal text-center">Confirmation process!</h4>
+
+    <p class="text-center">
+        @msg
+    </p>
+
+    <label class="text-danger text-center">@error</label>
+
+    <NavLink href="login">
+        <h6 class="font-weight-normal text-center">Return to login</h6>
+    </NavLink>
+</div>
+
+@code{ ConfirmEmailModel confirmEmailModel { get; set; } = new ConfirmEmailModel();
+    string error { get; set; }
+    string msg { get; set; }
+
+    protected override async Task OnInitializedAsync()
+
+    {
+        try
+        {
+            var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("t", out var token))
+            {
+                this.confirmEmailModel.ConfirmToken = token;
+            }
+
+            msg = "Account confirmation is in progress!";
+
+            await authStateProvider.ConfirmEmail(confirmEmailModel);
+
+            msg = "YAY! Successfully confirmed!";
+        }
+        catch (Exception ex)
+        {
+            msg = string.Empty;
+            error = ex.Message;
+        }
+    }
+
+}

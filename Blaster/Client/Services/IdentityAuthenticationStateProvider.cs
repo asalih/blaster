@@ -51,6 +51,11 @@ namespace Blaster.Client.Services
             await _authorizeApi.ResetPassword(resetPasswordModel);
         }
 
+        public async Task ConfirmEmail(ConfirmEmailModel confirmEmailModel)
+        {
+            await _authorizeApi.ConfirmEmail(confirmEmailModel);
+        }
+
         private async Task<UserInfo> GetUserInfo()
         {
             if (_userInfoCache != null && _userInfoCache.IsAuthenticated)
