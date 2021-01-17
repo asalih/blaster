@@ -19,16 +19,20 @@ namespace Blaster.Client.Services
         public async Task<UserInfo> GetUserInfo() =>
             await _httpClient.GetFromJsonAsync<UserInfo>("api/Authorize/UserInfo");
 
-        public async Task Login(LoginModel loginModel)
+        public async Task<LoginResultModel> Login(LoginModel loginModel)
         {
             var result = await _httpClient.PostAsJsonAsync("api/Authorize/Login", loginModel);
+            var model = await result.Content.ReadFromJsonAsync<LoginResultModel>();
 
             if (result.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
-                throw new Exception(await result.Content.ReadAsStringAsync());
+                if (!string.IsNullOrEmpty(model.ErrorMessage))
+                {
+                    throw new Exception(model.ErrorMessage);
+                }
             }
 
-            result.EnsureSuccessStatusCode();
+            return model;
         }
 
         public async Task Logout()
@@ -41,12 +45,12 @@ namespace Blaster.Client.Services
         public async Task Register(RegisterModel registerModel)
         {
             var result = await _httpClient.PostAsJsonAsync("api/Authorize/Register", registerModel);
-            
+
             if (result.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
                 throw new Exception(await result.Content.ReadAsStringAsync());
             }
-            
+
             result.EnsureSuccessStatusCode();
         }
 
@@ -65,6 +69,18 @@ namespace Blaster.Client.Services
         public async Task ResetPassword(ResetPasswordModel resetPasswordModel)
         {
             var result = await _httpClient.PostAsJsonAsync("api/Authorize/ResetPassword", resetPasswordModel);
+
+            if (result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                throw new Exception(await result.Content.ReadAsStringAsync());
+            }
+
+            result.EnsureSuccessStatusCode();
+        }
+
+        public async Task ResendConfirmEmail(ResendConfirmEmailModel resendConfirmEmailModel)
+        {
+            var result = await _httpClient.PostAsJsonAsync("api/Authorize/ResendConfirmEmailModel", resendConfirmEmailModel);
 
             if (result.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {

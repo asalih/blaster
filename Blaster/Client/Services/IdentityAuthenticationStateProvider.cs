@@ -19,11 +19,13 @@ namespace Blaster.Client.Services
             _authorizeApi = authorizeApi ?? throw new ArgumentNullException(nameof(authorizeApi));
         }
 
-        public async Task Login(LoginModel loginModel)
+        public async Task<LoginResultModel> Login(LoginModel loginModel)
         {
-            await _authorizeApi.Login(loginModel);
+            var result = await _authorizeApi.Login(loginModel);
 
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+
+            return result;
         }
 
         public async Task Register(RegisterModel registerModel)
@@ -44,6 +46,11 @@ namespace Blaster.Client.Services
         public async Task ForgotPassword(ForgotPasswordModel forgotPasswordModel)
         {
             await _authorizeApi.ForgotPassword(forgotPasswordModel);
+        }
+
+        public async Task ResendConfirmationEmail(ResendConfirmEmailModel resendConfirmEmailModel)
+        {
+            await _authorizeApi.ResendConfirmEmail(resendConfirmEmailModel);
         }
 
         public async Task ResetPassword(ResetPasswordModel resetPasswordModel)

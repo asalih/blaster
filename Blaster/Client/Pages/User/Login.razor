@@ -48,8 +48,20 @@
         error = null;
         try
         {
-            await authStateProvider.Login(loginModel);
-            navigationManager.NavigateTo("");
+            var result = await authStateProvider.Login(loginModel);
+
+            if (result.IsNotAllowed)
+            {
+                navigationManager.NavigateTo("/resend-confirmation-email");
+            }
+            else if (result.Succeeded)
+            {
+                navigationManager.NavigateTo("");
+            }
+            else
+            {
+                navigationManager.NavigateTo("/login");
+            }
         }
         catch (Exception ex)
         {

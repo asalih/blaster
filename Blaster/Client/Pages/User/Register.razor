@@ -11,6 +11,14 @@
     <DataAnnotationsValidator />
     <h4 class="font-weight-normal text-center">Create Account</h4>
 
+    <label for="inputEmail" class="sr-only">Name</label>
+    <InputText id="inputEmail" class="form-control" placeholder="Email Address" autofocus @bind-Value="@registerModel.Name" />
+    <ValidationMessage For="@(() => registerModel.Name)" />
+
+    <label for="inputEmail" class="sr-only">Last Name</label>
+    <InputText id="inputEmail" class="form-control" placeholder="Email Address" autofocus @bind-Value="@registerModel.LastName" />
+    <ValidationMessage For="@(() => registerModel.LastName)" />
+
     <label for="inputEmail" class="sr-only">Email Address</label>
     <InputText id="inputEmail" class="form-control" placeholder="Email Address" autofocus @bind-Value="@registerModel.Email" />
     <ValidationMessage For="@(() => registerModel.Email)" />
@@ -41,7 +49,7 @@
                 try
                 {
                     await authStateProvider.Register(registerModel);
-                    navigationManager.NavigateTo("register-ok");
+                    navigationManager.NavigateTo("register-success");
                 }
                 catch (Exception ex)
                 {

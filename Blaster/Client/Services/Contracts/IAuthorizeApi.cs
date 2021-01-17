@@ -5,7 +5,7 @@ namespace Blaster.Client.Services.Contracts
 {
     public interface IAuthorizeApi
     {
-        Task Login(LoginModel loginModel);
+        Task<LoginResultModel> Login(LoginModel loginModel);
 
         Task Register(RegisterModel registerModel);
 
@@ -16,6 +16,8 @@ namespace Blaster.Client.Services.Contracts
         Task ResetPassword(ResetPasswordModel resetPasswordModel);
 
         Task ConfirmEmail(ConfirmEmailModel confirmEmailModel);
+
+        Task ResendConfirmEmail(ResendConfirmEmailModel resendConfirmEmailModel);
 
         Task<UserInfo> GetUserInfo();
     }

@@ -1,0 +1,41 @@
+﻿@page "/resend-confirmation-email"
+@layout LoginLayout
+@inject NavigationManager navigationManager
+@inject IdentityAuthenticationStateProvider authStateProvider
+
+<h1 class="h2 font-weight-normal login-title">
+    Blaster
+</h1>
+
+<EditForm class="form-signin" OnValidSubmit="OnSubmit" Model="resendConfirmModel">
+    <DataAnnotationsValidator />
+    <h4 class="font-weight-normal text-center">Resend Confirmation Email</h4>
+
+    <label for="inputEmail" class="sr-only">Email Address</label>
+    <InputText id="inputEmail" class="form-control" placeholder="Email Address" autofocus @bind-Value="@resendConfirmModel.Email" />
+    <ValidationMessage For="@(() => resendConfirmModel.Email)" />
+
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Send confirm email</button>
+
+    <label class="text-danger">@error</label>
+    <NavLink href="login">
+        <h6 class="font-weight-normal text-center">Already have an account? Click here to login</h6>
+    </NavLink>
+</EditForm>
+
+@code{ ResendConfirmEmailModel resendConfirmModel { get; set; } = new ResendConfirmEmailModel();
+    string error { get; set; }
+
+    async Task OnSubmit()
+    {
+        error = null;
+        try
+        {
+            await authStateProvider.ResendConfirmationEmail(resendConfirmModel);
+            navigationManager.NavigateTo("/forgot-password-confirm");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    } }

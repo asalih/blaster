@@ -1,6 +1,7 @@
 ﻿using Blaster.Infrastructure.Entity;
 using Blaster.Infrastructure.Utility;
 using Blaster.Infrastructure.Utility.Contracts;
+using Blaster.Server.Models;
 using Blaster.Shared.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -24,15 +25,13 @@ namespace Blaster.Server.Controllers
         private readonly IEmailHelper _emailHelper;
         private readonly IDataProtector _dataProtector;
         private readonly CustomUrlHelper _customUrlHelper;
-        private readonly string _errorMessage = "Invalid email address or password!";
 
         public AuthorizeController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IEmailHelper emailHelper,
             IDataProtectionProvider dataProtectionProvider,
-            CustomUrlHelper customUrlHelper
-            )
+            CustomUrlHelper customUrlHelper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -45,23 +44,30 @@ namespace Blaster.Server.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginModel loginModel)
         {
-            var user = await _userManager.FindByNameAsync(loginModel.Email);
+            var user = await _userManager.FindByEmailAsync(loginModel.Email);
 
             if (user == null)
             {
-                return BadRequest(_errorMessage);
+                return BadRequest(new LoginResultModel().Invalid());
             }
 
-            var singInResult = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
+            
+            var loginResult = new LoginResultModel().MapFromSignInResult(result);
 
-            if (!singInResult.Succeeded)
+            if (!loginResult.Succeeded)
             {
-                return BadRequest(_errorMessage);
+                return BadRequest(loginResult);
+            }
+
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+            {
+                return BadRequest(loginResult.NeedsEmailConfirmation());
             }
 
             await _signInManager.SignInAsync(user, loginModel.RememberMe);
 
-            return Ok();
+            return Ok(loginResult);
         }
 
         [HttpPost]
@@ -70,7 +76,7 @@ namespace Blaster.Server.Controllers
         {
             var user = new User
             {
-                UserName = registerModel.Email,
+                UserName = $"{registerModel.Name} {registerModel.LastName}",
                 Email = registerModel.Email
             };
 
@@ -83,15 +89,12 @@ namespace Blaster.Server.Controllers
 
             var createdUser = await _userManager.FindByEmailAsync(registerModel.Email);
 
-            if(createdUser == null)
+            if (createdUser == null)
             {
                 return BadRequest("Something went wrong!");
             }
 
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(createdUser);
-
-            var uri = _customUrlHelper.GenerateUrl("confirm-email", new { t = token });
-            _emailHelper.Render(to: user.Email, subject: "Confirm Email", template: EmailTemplate.ConfirmEmail, new { uri });
+            await SendConfirmEmail(createdUser);
 
             return Ok();
         }
@@ -132,7 +135,7 @@ namespace Blaster.Server.Controllers
             {
                 return BadRequest(_error);
             }
-            
+
             var unprotectedResetTokenArray = _dataProtector.Unprotect(resetTokenArray);
 
             var userIdInput = string.Empty;
@@ -144,14 +147,14 @@ namespace Blaster.Server.Controllers
                 userIdInput = reader.ReadString();
             }
 
-            if(!Guid.TryParse(userIdInput, out var _))
+            if (!Guid.TryParse(userIdInput, out var _))
             {
                 return BadRequest(_error);
             }
 
             var user = await _userManager.FindByIdAsync(userIdInput);
 
-            if(user == null)
+            if (user == null)
             {
                 return BadRequest(_error);
             }
@@ -210,6 +213,26 @@ namespace Blaster.Server.Controllers
             return Ok();
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendConfirmEmailModel(ForgotPasswordModel forgotPasswordModel)
+        {
+            var user = await _userManager.FindByEmailAsync(forgotPasswordModel.Email);
+            if (user == null)
+            {
+                return Ok();
+            }
+
+            if(await _userManager.IsEmailConfirmedAsync(user))
+            {
+                return Ok();
+            }
+
+            await SendConfirmEmail(user);
+
+            return Ok();
+        }
+
         [HttpGet]
         public UserInfo UserInfo() => new UserInfo
         {
@@ -220,5 +243,14 @@ namespace Blaster.Server.Controllers
                     //.Where(c => c.Type == "test-claim")
                     .ToDictionary(c => c.Type, c => c.Value)
         };
+
+        [NonAction]
+        private async Task SendConfirmEmail(User user)
+        {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var uri = _customUrlHelper.GenerateUrl("confirm-email", new { t = token });
+            _emailHelper.Render(to: user.Email, subject: "Confirm Email", template: EmailTemplate.ConfirmEmail, new { uri });
+        }
     }
 }

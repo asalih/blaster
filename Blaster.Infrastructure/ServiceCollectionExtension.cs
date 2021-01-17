@@ -35,9 +35,13 @@ namespace Blaster.Infrastructure
 
         public static IServiceCollection AddBlasterIdentity(this IServiceCollection services)
         {
-            services.AddIdentity<User, IdentityRole<Guid>>(v => v.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<DataContext>()
-                .AddDefaultTokenProviders();
+            services.AddIdentity<User, IdentityRole<Guid>>(v =>
+            {
+                v.SignIn.RequireConfirmedAccount = false;
+                v.SignIn.RequireConfirmedEmail = false;
+            })
+            .AddEntityFrameworkStores<DataContext>()
+            .AddDefaultTokenProviders();
 
             services.AddTransient<IEmailHelper, EmailHelper>();
             services.AddTransient<CustomUrlHelper>();
